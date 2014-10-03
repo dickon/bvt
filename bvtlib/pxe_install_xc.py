@@ -20,7 +20,6 @@
 from socket import gethostname
 from bvtlib.exceptions import ExternalFailure
 from bvtlib.set_pxe_build import set_pxe_build, select_build, select_variant
-from bvtlib.mongodb import get_autotest
 from bvtlib.power_control import power_cycle
 from bvtlib.dhcp import get_addresses
 from bvtlib.wait_to_come_up import wait_to_come_up, is_installer_running
@@ -34,6 +33,7 @@ from filesystem_write_access import FilesystemWriteAccess
 from bvtlib.temporary_web_server import TemporaryWebServer
 from os.path import isdir
 from urllib import urlopen
+from bvtlib.duts import clear_test_failure
 
 class UnexpectedInstallAfterInstallation(ExternalFailure): 
     """Could not complete installation"""
@@ -126,8 +126,7 @@ def pxe_install_xc(dut, build=None, release=None, watch_tftp=None, upgrade=False
         raise UnableToContactAfterInstallation('wanted=',build,'on',dut)
     print 'HEADLINE: succesfully', 'upgraded' if upgrade else 'installed', \
         (release or build), 'on', dut
-    get_autotest().duts.update({'name':dut}, {'$unset': {'test_failed':1}})
-
+    clear_test_failure(dut)
 
 XT_INSTALL_TEST_CASE = {
     'description' : 'PXE install XT', 
